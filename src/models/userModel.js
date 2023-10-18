@@ -16,6 +16,13 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    isConfirmed: {
+      type: Boolean,
+      default: false,
+    },
+    confirmationToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,

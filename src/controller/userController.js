@@ -1,6 +1,12 @@
 const Joi = require("joi");
 const userModel = require("../models/userModel.js");
 const sendMail = require("../util/sendMail.js");
+const passport = require("passport");
+const {
+  generateJwtToken,
+  loginSuccess,
+  loginFailed,
+} = require("../util/passportConfig.js");
 const { generateConfirmationToken } = require("../util/confirmToken.js");
 
 /**
@@ -77,4 +83,35 @@ const confirmUserEmail = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, confirmUserEmail };
+/**
+ * @desc - used for authentication of user
+ * @param {{email:string,password:string}} req - takes object as input with emial and password as string
+ * @param {*} res
+ * @param {*} next
+ */
+const authUser = async (req, res, next) => {
+  //request object validation
+  const schema = Joi.object({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  });
+
+  const { error } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return loginFailed(res);
+    }
+    const token = generateJwtToken(user);
+    loginSuccess(res, user, token);
+  })(req, res, next);
+};
+
+module.exports = { registerUser, confirmUserEmail, authUser };

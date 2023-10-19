@@ -114,4 +114,24 @@ const authUser = async (req, res, next) => {
   })(req, res, next);
 };
 
-module.exports = { registerUser, confirmUserEmail, authUser };
+/**
+ * @desc - get user details but requires user to be logged in and have a token verfied by
+ *  protect middleware
+ * @param req
+ * @param res
+ */
+const getUserProfile = async (req, res) => {
+  const user = await userModel.findById(req.user._id);
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } else {
+    res.status(404).json({ msg: "User not found" });
+  }
+};
+
+module.exports = { registerUser, confirmUserEmail, authUser, getUserProfile };

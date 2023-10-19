@@ -134,4 +134,50 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, confirmUserEmail, authUser, getUserProfile };
+/**
+ * @desc - update user details but requires user to be logged in and have a token verfied by
+ *  protect middleware
+ * @param req
+ * @param res
+ */
+const updateUserProfile = async (req, res) => {
+  //req validation where atleast one of name email and password is present
+  const schema = Joi.object({
+    email: Joi.string(),
+    password: Joi.string(),
+    name: Joi.string(),
+  })
+    .or("email", "password", "name")
+    .min(1);
+
+  const { error } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const user = await userModel.findById(req.user._id);
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+    const updatedUser = await user.save();
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+    });
+  } else {
+    res.status(404).json({ msg: "User Not Updated" });
+  }
+};
+
+module.exports = {
+  registerUser,
+  confirmUserEmail,
+  authUser,
+  getUserProfile,
+  updateUserProfile,
+};

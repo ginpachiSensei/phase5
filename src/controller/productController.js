@@ -46,4 +46,21 @@ const getProducts = async (req, res) => {
   }
 };
 
-module.exports = { getProducts };
+/**
+ * @desc    Fetch product by given id
+ * @route   GET /api/products/:id
+ * @access  Public
+ * @param {{params:id}}: req
+ * this route requires pagination requires page number to passed in query
+ */
+const getProductById = async (req, res) => {
+  const product = await productModel.findById(req.params.id);
+
+  if (product) {
+    res.json(product);
+  } else {
+    res.status(404).json({ msg: "Product not found" });
+  }
+};
+
+module.exports = { getProducts, getProductById };

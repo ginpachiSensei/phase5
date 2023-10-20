@@ -4,6 +4,7 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/dbConfig.js");
 const userRoutes = require("./routes/userRoutes.js");
+const productRoutes = require("./routes/productRoutes.js");
 const passport = require("passport");
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use(passport.session());
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;

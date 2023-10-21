@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "data:import": "node backend/seeder",
-    "data:destroy": "node backend/seeder -d"
+    "data:import": "node src/seeder",
+    "data:destroy": "node src/seeder -d"
   },
   "keywords": [],
   "author": "",

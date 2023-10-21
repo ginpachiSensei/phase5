@@ -117,3 +117,7 @@ module.exports = {
   getOrders,
   updateOrderToDelivered,
 };
+  res.json(orders);
+};
+
+module.exports = { addOrderItems, getOrderById, getMyOrders };

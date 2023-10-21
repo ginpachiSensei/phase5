@@ -17,6 +17,9 @@ app.use(express.json());
 connectDB();
 
 //middlewares
+if (process.env.NODE_ENV === "dev") {
+  app.use(morgan("dev"));
+}
 app.use(express.urlencoded({ extended: false }));
 app.use(
   session({

@@ -31,18 +31,24 @@ const registerUser = async (req, res) => {
   const user = await userModel.findOne({ email });
   const confirmToken = await generateConfirmationToken();
   if (user) {
-    res.status(201).json({ msg: "Email already registered" });
+    res.status(201).json({ msg: "Email already in use" });
   } else {
     const newUser = new userModel({
       name,
       email,
       password,
+      isAdmin: false,
       isConfirmed: false,
       confirmationToken: confirmToken,
     });
     try {
       await newUser.save();
-      res.status(200).json({ msg: "done" });
+      res.status(200).json({
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        isAdmin: newUser.isAdmin,
+      });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -174,10 +180,87 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get all users
+ * @route   GET api/users/
+ * @access  Private/admin
+ * return all the users in database
+ */
+const getUsers = async (req, res) => {
+  const users = await userModel.find({});
+  res.json(users);
+};
+
+/**
+ * @desc    Delete user by id
+ * @route   DELETE /api/users/:id
+ * @access  Private/admin
+ * @param {query {id}}: req
+ * delete user by id can be done by admin only
+ */
+const deleteUser = async (req, res) => {
+  const user = await userModel.findById(req.params.id);
+  if (user) {
+    await user.remove();
+    res.json({ msg: "user removed" });
+  } else {
+    res.status(404).json({ msg: "user not found" });
+  }
+};
+
+/**
+ * @desc    Get User By Id
+ * @route   GET /api/users/:id
+ * @access  Private/admin
+ * @param {query {id}}: req
+ * get user by id for admin only
+ */
+const getUserById = async (req, res) => {
+  const user = await userModel.findById(req.params.id).select("-password");
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404).json({ msg: "user not found" });
+  }
+};
+
+//TODO: joi validation
+/**
+ * @desc    Update user
+ * @route   PUT /api/users
+ * @access  Private/admin
+ * @param {{name:string,email:string,isAdmin:bool}}: req
+ * update user for admin only
+ */
+const updateUser = async (req, res) => {
+  const user = await userModel.findById(req.params.id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.isAdmin = req.body.isAdmin;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+    });
+  } else {
+    res.status(404).json({ msg: "User not found" });
+  }
+};
+
 module.exports = {
   registerUser,
   confirmUserEmail,
   authUser,
   getUserProfile,
   updateUserProfile,
+  getUsers,
+  deleteUser,
+  getUserById,
+  updateUser,
 };

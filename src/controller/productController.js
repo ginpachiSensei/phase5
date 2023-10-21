@@ -63,4 +63,84 @@ const getProductById = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProductById };
+/**
+ * @desc    create new product
+ * @route   POST /api/products/
+ * @access  Private/admin
+ * @param {{name:string,description:string,price:int,countInStock:int}}: req
+ * this route is used to create product with product object can be done by only admin
+ */
+const createProduct = async (req, res) => {
+  const createProductSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().optional(),
+    price: Joi.number().integer().required(),
+    countInStock: Joi.number().integer().required(),
+  });
+
+  const { error } = createProductSchema.validate(req.query);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const product = new productModel({
+    user: req.user._id,
+    name: req.name,
+    description: req.description,
+    price: 0,
+    countInStock: 0,
+  });
+
+  const createdProduct = await product.save();
+  res.status(201).json(createdProduct);
+};
+
+/**
+ * @desc    update a product
+ * @route   PUT /api/products/:id
+ * @access  Private/admin
+ * @param {{name:string,description:string,price:int,countInStock:int}}: req
+ * route to update product can be done by admin only
+ */
+const updateProduct = async (req, res) => {
+  const product = await productModel.findById(req.params.id);
+
+  if (product) {
+    product.name = req.body.name;
+    product.description = req.body.description;
+    product.price = req.body.price;
+    product.countInStock = req.body.countInStock;
+
+    const updatedProduct = await product.save();
+
+    res.status(201).json(updatedProduct);
+  } else {
+    res.status(404).json({ msg: "Product not found" });
+  }
+};
+
+/**
+ * @desc    delete a product
+ * @route   DELETE /api/products/:id
+ * @access  Private/admin
+ * @param {query{id}}: req
+ * delete a product by product id can be done only by admin
+ */
+const deleteProduct = async (req, res) => {
+  const product = await productModel.findById(req.params.id);
+  if (product) {
+    await product.remove();
+    res.status(201).json({ message: "product removed" });
+  } else {
+    res.status(404).json({ msg: "product not found" });
+  }
+};
+
+module.exports = {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+};

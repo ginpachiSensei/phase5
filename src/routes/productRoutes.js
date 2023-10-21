@@ -3,9 +3,18 @@ const router = express.Router();
 const {
   getProducts,
   getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 } = require("../controller/productController.js");
+const { protect, admin } = require("../middleware/authMiddleware.js");
 
-router.get("/", getProducts);
-router.get("/:id", getProductById);
+router.route("/").get(getProducts).post(protect, admin, createProduct);
+
+router
+  .route("/:id")
+  .get(getProductById)
+  .put(protect, admin, updateProduct)
+  .delete(protect, admin, deleteProduct);
 
 module.exports = router;

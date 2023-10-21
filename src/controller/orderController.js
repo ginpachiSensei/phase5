@@ -65,7 +65,7 @@ const getOrderById = async (req, res) => {
 };
 
 /**
- * @desc    Fetch all products for loggedin user
+ * @desc    Fetch all orders for loggedin user
  * @route   GET /api/orders
  * @access  Public
  * @param req
@@ -73,6 +73,50 @@ const getOrderById = async (req, res) => {
  */
 const getMyOrders = async (req, res) => {
   const orders = await orderModel.find({ user: req.user._id });
+  res.status(200).json(orders);
+};
+
+/**
+ * @desc    Fetch all orders by all the users
+ * @route   GET /api/orders
+ * @access  Private/admin
+ * @param req
+ * returns all the orders by all the users
+ */
+const getOrders = async (req, res) => {
+  const orders = await orderModel.find({}).populate("user", "id name");
+  res.status(200).json(orders);
+};
+
+/**
+ * @desc    update order to delivered
+ * @route   PUT /api/orders/:id/deliverd
+ * @access  Private/admin
+ * @param req
+ * mark order to deliverd can be done only by admin
+ */
+const updateOrderToDelivered = async (req, res) => {
+  const order = await orderModel.findById(req.params.id);
+
+  if (order) {
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+
+    const updatedOrder = await order.save();
+
+    res.status(200).json(updatedOrder);
+  } else {
+    res.status(404).json({ msg: "Order not found" });
+  }
+};
+
+module.exports = {
+  addOrderItems,
+  getOrderById,
+  getMyOrders,
+  getOrders,
+  updateOrderToDelivered,
+};
   res.json(orders);
 };
 

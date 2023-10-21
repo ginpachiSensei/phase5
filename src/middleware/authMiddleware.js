@@ -39,4 +39,20 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+/**
+ * @desc - middleware that verifies if user is admin or not checks user for isAdmin field
+ * in database
+ * @param  req - require user object and containe isAdmin = true
+ * @param res
+ * @param next
+ * @returns next if use isAdmin
+ */
+const admin = (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(401).json({ msg: "Not authorized as an admin" });
+  }
+};
+
+module.exports = { protect, admin };

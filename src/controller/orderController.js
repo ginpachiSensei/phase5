@@ -117,5 +117,3 @@ module.exports = {
   getOrders,
   updateOrderToDelivered,
 };
-
-module.exports = { addOrderItems, getOrderById, getMyOrders };

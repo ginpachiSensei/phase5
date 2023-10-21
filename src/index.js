@@ -7,6 +7,8 @@ const userRoutes = require("./routes/userRoutes.js");
 const productRoutes = require("./routes/productRoutes.js");
 const orderRoutes = require("./routes/orderRoutes.js");
 const passport = require("passport");
+const notFound = require("./middleware/notFound.js");
+const morgan = require("morgan");
 dotenv.config();
 
 const app = express();
@@ -17,6 +19,9 @@ app.use(express.json());
 connectDB();
 
 //middlewares
+if (process.env.NODE_ENV === "dev") {
+  app.use(morgan("dev"));
+}
 app.use(express.urlencoded({ extended: false }));
 app.use(
   session({
@@ -28,12 +33,13 @@ app.use(
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
-// app.use(flash());
 
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+
+app.use(notFound);
 
 // Start server
 const PORT = process.env.PORT || 3000;

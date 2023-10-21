@@ -15,6 +15,6 @@ router
   .get(protect, getMyOrders)
   .get(protect, admin, getOrders);
 router.route("/:id").get(protect, getOrderById);
-route.route("/:id/deliver").put(protect, admin, updateOrderToDelivered);
+router.route("/:id/deliver").put(protect, admin, updateOrderToDelivered);
 
 module.exports = router;

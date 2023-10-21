@@ -1,6 +1,9 @@
 const dotenv = require("dotenv");
-const products = require("./sample_data/products.js");
+const productSample = require("./sample_data/products.js");
+const userSample = require("./sample_data/users.js");
 const productModel = require("./models/productModel.js");
+const orderModel = require("./models/orderModel.js");
+const userModel = require("./models/userModel.js");
 const connectDB = require("./config/dbConfig.js");
 
 dotenv.config();
@@ -10,9 +13,15 @@ connectDB();
 const importData = async () => {
   try {
     await productModel.deleteMany();
+    await orderModel.deleteMany();
+    await userModel.deleteMany();
 
-    const sampleProducts = products.map((product) => {
-      return { ...product };
+    const createdUsers = await userModel.insertMany(userSample);
+
+    const adminUser = createdUsers[0]._id;
+
+    const sampleProducts = productSample.map((product) => {
+      return { ...product, user: adminUser };
     });
 
     await productModel.insertMany(sampleProducts);
@@ -27,7 +36,10 @@ const importData = async () => {
 
 const destroyData = async () => {
   try {
-    await productModel.deleteMany();
+    await Order.deleteMany();
+    await Product.deleteMany();
+    await User.deleteMany();
+
     console.log("Data Destroyed!");
     process.exit();
   } catch (error) {

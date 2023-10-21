@@ -63,4 +63,37 @@ const getProductById = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProductById };
+/**
+ * @desc    create new product
+ * @route   POST /api/products/
+ * @access  Private/admin
+ * @param {{name:string,description:string,price:int,countInStock:int}}: req
+ * this route requires pagination requires page number to passed in query
+ */
+const createProduct = async (req, res) => {
+  const createProductSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().optional(),
+    price: Joi.number().integer().required(),
+    countInStock: Joi.number().integer().required(),
+  });
+
+  const { error } = createProductSchema.validate(req.query);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const product = new productModel({
+    user: req.user._id,
+    name: req.name,
+    description: req.description,
+    price: 0,
+    countInStock: 0,
+  });
+
+  const createdProduct = await product.save();
+  res.status(201).json(createdProduct);
+};
+
+module.exports = { getProducts, getProductById, createProduct };

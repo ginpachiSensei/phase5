@@ -68,7 +68,7 @@ const getProductById = async (req, res) => {
  * @route   POST /api/products/
  * @access  Private/admin
  * @param {{name:string,description:string,price:int,countInStock:int}}: req
- * this route requires pagination requires page number to passed in query
+ * this route is used to create product with product object can be done by only admin
  */
 const createProduct = async (req, res) => {
   const createProductSchema = Joi.object({
@@ -96,4 +96,28 @@ const createProduct = async (req, res) => {
   res.status(201).json(createdProduct);
 };
 
-module.exports = { getProducts, getProductById, createProduct };
+/**
+ * @desc    update a product
+ * @route   PUT /api/products/:id
+ * @access  Private/admin
+ * @param {{name:string,description:string,price:int,countInStock:int}}: req
+ * route to update product can be done by admin only
+ */
+const updateProduct = async (req, res) => {
+  const product = await productModel.findById(req.params.id);
+
+  if (product) {
+    product.name = req.body.name;
+    product.description = req.body.description;
+    product.price = req.body.price;
+    product.countInStock = req.body.countInStock;
+
+    const updatedProduct = await product.save();
+
+    res.status(201).json(updatedProduct);
+  } else {
+    res.status(404).json({ msg: "Product not found" });
+  }
+};
+
+module.exports = { getProducts, getProductById, createProduct, updateProduct };
